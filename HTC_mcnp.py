@@ -23,9 +23,9 @@ def BashFileGen(BASH_FILE,MCNP_CODE,MCNP_DATA,INPUT):
 
 # Function that generates the HTCondor Submission
 # file for MCNP execution
-def HTCsubFileGen(SUB_FILE,BASH_FILE, INPUT):
+def HTCsubFileGen(SUB_FILE,BASH_FILE, INPUT, LOG="HTC_mcnp.log", OUT="HTC_mcnp.out"):
     text_file = open(SUB_FILE, "w")
-    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = HTC_mcnp.out\nLog = HTC_mcnp.log\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT))
+    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = %s\nLog = %s\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT,OUT,LOG))
     text_file.close()
 
 # Function that generates a new mcnp input file
@@ -72,8 +72,10 @@ def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE):
         INPUT_i        = newMCNPinput(INPUT,i,NPS=1e6)
         HTC_mcnp_sh_i  = "HTC_mcnp_%03d.sh"%(i)
         HTC_mcnp_sub_i = "HTC_mcnp_%03d.sub"%(i)
+        HTC_mcnp_log_i = "HTC_mcnp_%03d.log"%(i)
+        HTC_mcnp_out_i = "HTC_mcnp_%03d.out"%(i)
         BashFileGen(HTC_mcnp_sh_i,MCNP_CODE,MCNP_DATA,INPUT_i)
-        HTCsubFileGen(HTC_mcnp_sub_i,HTC_mcnp_sh_i, INPUT_i)
+        HTCsubFileGen(HTC_mcnp_sub_i,HTC_mcnp_sh_i, INPUT_i, OUT=HTC_mcnp_out_i, LOG=HTC_mcnp_log_i )
         HTC_files.append(HTC_mcnp_sub_i)
     return HTC_files
 
