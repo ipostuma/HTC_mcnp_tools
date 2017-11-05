@@ -81,11 +81,17 @@ def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE):
 
 # Function that generates the bash file to launch
 # mcnp calculations of the cluster
-def SubmitJob(SUB_FILES):
+def SubmitJob(SUB_FILES,INPUT):
     text_file = open("HTC_submit.sh","w")
     text_file.write("#!/bin/bash\n")
+    i = 0
     for subfile in SUB_FILES:
-        text_file.write("condor_submit " + subfile + " &\n")
+        NewFileName = INPUT+"%03d"%i
+        text_file.write("if [ ! -f? %s ]\n"%(NewFileName))
+        text_file.write("then\n")
+        text_file.write("\tcondor_submit " + subfile + " &\n")
+        text_file.write("fi\n")
+        i+=1
     text_file.close()
     # start execution
     os.system("bash HTC_submit.sh")
@@ -154,5 +160,5 @@ if __name__ == '__main__':
     if args.HTCondor_merge == False :
         HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE)
         if(args.HTCondor_submit):
-            SubmitJob(HTC_files)
+            SubmitJob(HTC_files,INPUT)
     else: os.system("%s %s???m"%(os.path.join(MCNP_CODE,"merge_mctal"),INPUT))
