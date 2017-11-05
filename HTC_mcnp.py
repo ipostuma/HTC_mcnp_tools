@@ -87,7 +87,7 @@ def SubmitJob(SUB_FILES,INPUT):
     i = 0
     for subfile in SUB_FILES:
         NewFileName = INPUT+"%03d"%i
-        text_file.write("if [ ! -f? %s ]\n"%(NewFileName))
+        text_file.write("if [ ! -f %s? ]\n"%(NewFileName))
         text_file.write("then\n")
         text_file.write("\tcondor_submit " + subfile + " &\n")
         text_file.write("fi\n")
