@@ -37,7 +37,7 @@ def newMCNPinput(INPUT,Fnumber,NPS=1e6):
     dbcn_bool   = True
     prdmp_bool  = True
     for line in fs:
-        comment = l.strip(line[0:5])
+        comment = lstrip(line[0:5])
         if re.search('nps', line, re.IGNORECASE) and (comment[0]!="c" or  comment[0]!="C"):
             new_line = "nps %1.2e $ HTC_mcnp mod\n"%(NPS)
             ft.write(new_line)
