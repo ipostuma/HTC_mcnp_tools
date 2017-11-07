@@ -37,15 +37,16 @@ def newMCNPinput(INPUT,Fnumber,NPS=1e6):
     dbcn_bool   = True
     prdmp_bool  = True
     for line in fs:
-        if re.search('nps', line, re.IGNORECASE):
+        comment = l.strip(line[0:5])
+        if re.search('nps', line, re.IGNORECASE) and (comment[0]!="c" or  comment[0]!="C"):
             new_line = "nps %1.2e $ HTC_mcnp mod\n"%(NPS)
             ft.write(new_line)
             nps_bool  = False
-        elif re.search('dbcn', line, re.IGNORECASE):
+        elif re.search('dbcn', line, re.IGNORECASE) and (comment[0]!="c" or  comment[0]!="C"):
             new_line = "dbcn %d $ HTC_mcnp mod\n"%(Fnumber*2+1001)
             ft.write(new_line)
             dbcn_bool = False
-        elif re.search('prdmp', line, re.IGNORECASE):
+        elif re.search('prdmp', line, re.IGNORECASE) and (comment[0]!="c" or  comment[0]!="C"):
             new_line = "prdmp j j 1 $ HTC_mcnp mod\n"
             ft.write(new_line)
             prdmp_bool = False
