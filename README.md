@@ -1,3 +1,14 @@
+# HTCondor for MCNP simulations
+
+This linux command line tool will help you send simulations on a HTCondor cluster, that has a common directory containing MCNP code.
+
+## INSTALL
+
+Clone this repository and add the bin directory to the PATH variable in your bashprofile.
+
+## USAGE
+
+```
 usage: condor_mcnp [-h] [-k] [-s] [-m] PATH_TO_MCNP INPUT CORE NPS
 
 Create multiple jobs to launch on an HTCondor infrastructure
@@ -17,3 +28,4 @@ optional arguments:
                         Launch HTCondor batch-system after splitting files.
   -m, --HTCondor_merge  Once the simulation has finished, you may use this
                         parameter to create a merget MCTAL.
+```

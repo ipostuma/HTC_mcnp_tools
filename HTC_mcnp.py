@@ -37,15 +37,16 @@ def newMCNPinput(INPUT,Fnumber,NPS=1e6):
     dbcn_bool   = True
     prdmp_bool  = True
     for line in fs:
-        if re.search('nps', line, re.IGNORECASE):
+        comment = line[0:6].lstrip()
+        if re.search('nps', line, re.IGNORECASE) and (comment[0:2]!="c " and  comment[0:2]!="C "):
             new_line = "nps %1.2e $ HTC_mcnp mod\n"%(NPS)
             ft.write(new_line)
             nps_bool  = False
-        elif re.search('dbcn', line, re.IGNORECASE):
+        elif re.search('dbcn', line, re.IGNORECASE) and (comment[0:2]!="c " and  comment[0:2]!="C "):
             new_line = "dbcn %d $ HTC_mcnp mod\n"%(Fnumber*2+1001)
             ft.write(new_line)
             dbcn_bool = False
-        elif re.search('prdmp', line, re.IGNORECASE):
+        elif re.search('prdmp', line, re.IGNORECASE) and (comment[0:2]!="c " and  comment[0:2]!="C "):
             new_line = "prdmp j j 1 $ HTC_mcnp mod\n"
             ft.write(new_line)
             prdmp_bool = False
@@ -81,11 +82,17 @@ def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS):
 
 # Function that generates the bash file to launch
 # mcnp calculations of the cluster
-def SubmitJob(SUB_FILES):
+def SubmitJob(SUB_FILES,INPUT):
     text_file = open("HTC_submit.sh","w")
     text_file.write("#!/bin/bash\n")
+    i = 0
     for subfile in SUB_FILES:
-        text_file.write("condor_submit " + subfile + " &\n")
+        NewFileName = INPUT+"%03d"%i
+        text_file.write("if [ ! -f %s? ]\n"%(NewFileName))
+        text_file.write("then\n")
+        text_file.write("\tcondor_submit " + subfile + " &\n")
+        text_file.write("fi\n")
+        i+=1
     text_file.close()
     # start execution
     os.system("bash HTC_submit.sh")
@@ -155,5 +162,5 @@ if __name__ == '__main__':
     if args.HTCondor_merge == False :
         HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS)
         if(args.HTCondor_submit):
-            SubmitJob(HTC_files)
+            SubmitJob(HTC_files,INPUT)
     else: os.system("%s %s???m"%(os.path.join(MCNP_CODE,"merge_mctal"),INPUT))
