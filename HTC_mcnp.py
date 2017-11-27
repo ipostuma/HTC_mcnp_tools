@@ -66,10 +66,10 @@ def newMCNPinput(INPUT,Fnumber,NPS=1e6):
 
 # Function that splits the mcnp calculation in multiple
 # files before Submission
-def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE):
+def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS):
     HTC_files = []
     for i in range(CORE):
-        INPUT_i        = newMCNPinput(INPUT,i,NPS=1e6)
+        INPUT_i        = newMCNPinput(INPUT,i,NPS)
         HTC_mcnp_sh_i  = "HTC_mcnp_%03d.sh"%(i)
         HTC_mcnp_sub_i = "HTC_mcnp_%03d.sub"%(i)
         HTC_mcnp_log_i = "HTC_mcnp_%03d.log"%(i)
@@ -150,9 +150,10 @@ if __name__ == '__main__':
     MCNP_DATA    = os.path.join(PATH_TO_MCNP,"MCNP_DATA")
     INPUT        = args.INPUT
     CORE         = args.CORE
+    NPS          = args.NPS
 
     if args.HTCondor_merge == False :
-        HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE)
+        HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS)
         if(args.HTCondor_submit):
             SubmitJob(HTC_files)
     else: os.system("%s %s???m"%(os.path.join(MCNP_CODE,"merge_mctal"),INPUT))
