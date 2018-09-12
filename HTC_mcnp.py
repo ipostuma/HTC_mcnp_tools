@@ -25,7 +25,7 @@ def BashFileGen(BASH_FILE,MCNP_CODE,MCNP_DATA,INPUT):
 # file for MCNP execution
 def HTCsubFileGen(SUB_FILE,BASH_FILE, INPUT, LOG="HTC_mcnp.log", OUT="HTC_mcnp.out"):
     text_file = open(SUB_FILE, "w")
-    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = %s\nLog = %s\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT,OUT,LOG))
+    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = %s\nLog = %s\ntransfer_output_files=%sm,%smsht\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT,OUT,LOG,INPUT,INPUT))
     text_file.close()
 
 # Function that generates a new mcnp input file
