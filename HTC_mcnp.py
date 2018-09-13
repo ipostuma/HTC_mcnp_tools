@@ -23,9 +23,9 @@ def BashFileGen(BASH_FILE,MCNP_CODE,MCNP_DATA,INPUT):
 
 # Function that generates the HTCondor Submission
 # file for MCNP execution
-def HTCsubFileGen(SUB_FILE,BASH_FILE, INPUT, LOG="HTC_mcnp.log", OUT="HTC_mcnp.out"):
+def HTCsubFileGen(SUB_FILE,BASH_FILE, INPUT, LOG="HTC_mcnp.log", OUT="HTC_mcnp.out", MorMESH="m"):
     text_file = open(SUB_FILE, "w")
-    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = %s\nLog = %s\ntransfer_output_files=%sm,%smsht\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT,OUT,LOG,INPUT,INPUT))
+    text_file.write("Universe = vanilla\nExecutable = %s\nInput = %s\nOutput = %s\nLog = %s\ntransfer_output_files=%s%s\nshould_transfer_files = IF_NEEDED\nwhen_to_transfer_output = ON_EXIT\nQueue\n" % (BASH_FILE,INPUT,OUT,LOG,INPUT,MorMESH))
     text_file.close()
 
 # Function that generates a new mcnp input file
@@ -67,7 +67,7 @@ def newMCNPinput(INPUT,Fnumber,NPS=1e6):
 
 # Function that splits the mcnp calculation in multiple
 # files before Submission
-def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS):
+def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS,RESULTFILE):
     HTC_files = []
     for i in range(CORE):
         INPUT_i        = newMCNPinput(INPUT,i,NPS)
@@ -76,7 +76,7 @@ def SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS):
         HTC_mcnp_log_i = "HTC_mcnp_%03d.log"%(i)
         HTC_mcnp_out_i = "HTC_mcnp_%03d.out"%(i)
         BashFileGen(HTC_mcnp_sh_i,MCNP_CODE,MCNP_DATA,INPUT_i)
-        HTCsubFileGen(HTC_mcnp_sub_i,HTC_mcnp_sh_i, INPUT_i, OUT=HTC_mcnp_out_i, LOG=HTC_mcnp_log_i )
+        HTCsubFileGen(HTC_mcnp_sub_i,HTC_mcnp_sh_i, INPUT_i, OUT=HTC_mcnp_out_i, LOG=HTC_mcnp_log_i, MorMESH=RESULTFILE)
         HTC_files.append(HTC_mcnp_sub_i)
     return HTC_files
 
@@ -130,6 +130,11 @@ def check_INPUT(value):
         raise argparse.ArgumentTypeError("%s file not found"%(INPUT_FILE))
     return INPUT
 
+# Function that checks if RESULTFILE extension is m, msht, r or o
+def check_RESULTFILE(value):
+    if False == (value=='m' or value=='msht' or value=='o' or value=='r'):
+        raise argparse.ArgumentTypeError("%s resultfile extension not recognized."%(value))
+    return value
 ######################################
 #       Argument definitions         #
 ######################################
@@ -139,6 +144,7 @@ parser.add_argument('PATH_TO_MCNP', type=check_MCNP , help='Path to MCNP directo
 parser.add_argument('INPUT', type=check_INPUT, help='MCNP intput file.')
 parser.add_argument('CORE', type=check_positive, help='Number of cores needed for the simulation.')
 parser.add_argument('NPS', type=check_positive, help='Nuber of particles on each core.')
+parser.add_argument('RESULTFILE', type=check_RESULTFILE, help='tell CONDOR_MCNP which output file you want. The correct values for this argument are: m, msht, r or o.')
 parser.add_argument('-k','--KCODE', action='store_true',
                     help='This parameter is needed to activate KCODE calculations -- STILL NOT ACTIVE.')
 parser.add_argument('-s','--HTCondor_submit', action='store_true',
@@ -156,11 +162,12 @@ if __name__ == '__main__':
     MCNP_CODE    = os.path.join(PATH_TO_MCNP,"MCNP_CODE/bin")
     MCNP_DATA    = os.path.join(PATH_TO_MCNP,"MCNP_DATA")
     INPUT        = args.INPUT
+    RESULTFILE   = args.RESULTFILE
     CORE         = args.CORE
     NPS          = args.NPS
 
     if args.HTCondor_merge == False :
-        HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS)
+        HTC_files = SplitMCNP(MCNP_CODE,MCNP_DATA,INPUT,CORE,NPS,RESULTFILE)
         if(args.HTCondor_submit):
             SubmitJob(HTC_files,INPUT)
     else: os.system("%s %s???m"%(os.path.join(MCNP_CODE,"merge_mctal"),INPUT))
